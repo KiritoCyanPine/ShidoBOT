@@ -1,0 +1,66 @@
+import discord
+import os
+from discord.ext import commands
+from discord.ext.commands import Bot
+#from manganelo import (MangaInfo, SearchManga)
+
+# manganelo==1.5.1
+'''
+search = SearchManga("Cultivator Against Hero Society", threaded=False)
+results = list(search.results())
+print(results)
+first_result = results[0].url
+info = MangaInfo(first_result)
+DataStructure = dir(info)
+print(DataStructure)
+chapter_list = info.results().chapters
+print(info.results().chapters[21].title)
+print(chapter_list)
+print(info.results().chapters[26], "\n\n\n")
+
+manga_info = MangaInfo("https://manganelo.com/manga/et923360", threaded=True)
+
+manga_page = manga_info.results()
+
+print("\n\n\n", manga_page)
+print(manga_page.chapters[-1].num)
+'''
+
+client = discord.Client()
+cli = commands.Bot(command_prefix="+")
+
+
+@client.event
+async def on_ready():
+    print(f'logged in as user {client.user}')
+
+
+@client.event
+async def on_message(own):
+    def checkAuth(m):
+      return m.content == '$2' and m.channel != client.user
+    def checkAuth2(m):
+      return m.content == '$3' and m.channel != client.user
+
+    if own.author == client.user:
+        return
+    if own.content.startswith('$hello'):
+        await own.channel.send("right back at Ya")
+
+
+    msg = await client.wait_for('message', check=checkAuth)
+    await own.channel.send('Hello {.author}!'.format(msg))
+
+
+    msg = await client.wait_for('message', check=checkAuth2)
+    await own.channel.send("waiting for message 2..")
+
+    embed=discord.Embed(title="Sample Embed", url="https://realdrewdata.medium.com/", description="This is an embed that will show how to build an embed and the different components",
+    color=0xFF5733)
+    await own.channel.send(embed=embed)
+
+
+token = open("TOKEN","r")
+token_str = token.read()
+token.close()
+client.run(token_str)
