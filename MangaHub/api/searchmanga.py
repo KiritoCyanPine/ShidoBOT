@@ -55,7 +55,11 @@ class SearchManga(APIBase):
 		self._join_thread()
 
 		# Entire page soup
-		soup = BeautifulSoup(self._response.text, "lxml")
+		try:
+			soup = BeautifulSoup(self._response.text, "lxml")
+		except Exception:
+			print("MangaHub error loading page...")
+			return
 		# print(soup)
 		# List of the search results
 		results = soup.find_all(class_="media-heading")

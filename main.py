@@ -9,7 +9,7 @@ import manganelo
 import MangaHub
 import kissmanga
 import fanfox
-
+from keep_alive import keep_alive
 # manganelo==1.5.1
 
 
@@ -28,6 +28,7 @@ async def on_message(own):
     global start_running
 
     # messages from bot will be Ignored
+    msgAuth = own.author
     if own.author == client.user:
         return
 
@@ -36,6 +37,11 @@ async def on_message(own):
         # print("session started...")
         if not start_running:
             start_running = True
+
+            if own.content == "!restart shido":
+                start_running = False
+                return await own.channel.send('```restarting session...```')
+
             A = own.content
             searchStr = A[8:]  # extract only the manga name
             search = manganelo.SearchManga(searchStr, threaded=False)  # search in Manganelo for correct name / options
@@ -66,11 +72,15 @@ async def on_message(own):
             # will return list of mangas identified
 
         # inside part MAIN (part - 2): the argument used to denote the manga in the above list
-        msg = await client.wait_for('message', check=lambda message: message.author != client.user)
+        msg = await client.wait_for('message', check=lambda message: message.author == msgAuth)
         # wait for a command not from Bot
 
         if not start_running:
             start_running = True
+
+            if msg.content == "!restart shido":
+                start_running = False
+                return await own.channel.send('```restarting session...```')
 
             if not msg.content.isnumeric():  # input must be number
                 await own.channel.send('```Please enter Numeric response.\n```')  # if not return
@@ -187,9 +197,13 @@ async def on_message(own):
             start_running = False
             # will return Manga Info with chapter list
 
-        msg1 = await client.wait_for('message', check=lambda message: message.author != client.user)  # wait for cmd
+        msg1 = await client.wait_for('message', check=lambda message: message.author == msgAuth)  # wait for cmd
         if not start_running:
             start_running = True
+
+            if msg1.content == "!restart shido":
+                start_running = False
+                return await own.channel.send('```restarting session...```')
 
             if not msg1.content.isnumeric():  # if cmd not a number Exit session
                 await own.channel.send('```Please enter Numeric response.\n```')
@@ -204,22 +218,26 @@ async def on_message(own):
 
             if serverChoice == '1':
                 server = manganelo.MangaInfo(info.url)
+                infoSelect = info
                 serverName = "MangaNelo"
             elif serverChoice == '2':
                 server = kissmanga.MangaInfo(info2.url)
+                infoSelect = info2
                 serverName = "KissManga"
             elif serverChoice == '3':
                 server = fanfox.MangaInfo(info3.url)
+                infoSelect = info3
                 serverName = "FanFox"
             elif serverChoice == '4':
                 server = MangaHub.MangaInfo(info4.url)
+                infoSelect = info4
                 serverName = "MangaHub"
             # server is a variable chosen according to our option
             chapter_list = server.results().chapters  # get list of chapters from the chosen server
 
-            if serverName == "FanFox" and len(chapter_list) == 0:  # if chapter is empty in fanfox .. it is protected
-                Fmessage = f'Shido :sorry to break it to you, But FanFox has decided to tag this content as mature... \n' \
-                          f'So i cannot access it directly, but you can in their website... click [here]({info3.url})' \
+            if len(chapter_list) == 0:  # if chapter is empty in fanfox .. it is protected
+                Fmessage = f'Shido :sorry to break it to you, But {serverName} has decided to tag this content as mature... \n' \
+                          f'So i cannot access it directly, but you can in their website... click [here]({infoSelect.url})' \
                           f' to open in browser'
                 embed = discord.Embed(  # making an EMBED object for chapter list
                     title="FanFox",
@@ -243,13 +261,18 @@ async def on_message(own):
             start_running = False
 
         # inside part MAIN (part - 3): the argument used to denote the chapter or list of chapters denoted
-        msg2 = await client.wait_for('message', check=lambda message: message.author != client.user)
+        msg2 = await client.wait_for('message', check=lambda message: message.author == msgAuth)
         # wait for user message...
         if not start_running:
             start_running = True
-            chapter_sChose = msg2.content
-            container = set("0123456789- ")  # set of allowed characters in the cmd
 
+            if msg2.content == "!restart shido":
+                start_running = False
+                return await own.channel.send('```restarting session...```')
+
+            chapter_sChose = msg2.content
+            print(chapter_sChose)
+            container = "0123456789- "  # set of allowed characters in the cmd
             if any((c not in container) for c in chapter_sChose):  # if not in allowed characters Exit Session
                 await own.channel.send('```Please enter Numeric response.\n```')
                 start_running = False
@@ -320,7 +343,8 @@ async def on_message(own):
             # will return one (or) list of embeds of chapters from various sources
 
     return
-
+print("entered script")
+keep_alive()
 
 token = open("TOKEN", "r")
 token_str = token.read()
