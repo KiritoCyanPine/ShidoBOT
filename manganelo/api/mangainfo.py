@@ -115,10 +115,10 @@ class MangaInfo(APIBase):
                 text = ele.find("a").text
 
                 # Convert the string to the data type it needs. Eg 11.5 -> float | 10.0 -> int
-                num = ast.literal_eval(url.split("chapter_")[-1])
+                # num = ast.literal_eval(url.split("chapter_")[-1])
                 num = count
                 c = MangaChapter(url=url, num=num, title=text)
-                count+=1
+                count += 1
                 ls.append(c)
 
         return ls
