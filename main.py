@@ -52,6 +52,25 @@ async def on_message(own):
                 searchStr = A[8:]  # extract only the manga name
                 search = manganelo.SearchManga(searchStr, threaded=False)  # search in Manganelo for correct name / options
                 results = list(search.results())  # collect the results
+                serverNo = 1
+
+                if len(results) == 0:
+                    search = MangaHub.SearchManga(searchStr,
+                                                  threaded=False)  # search in Manganelo for correct name / options
+                    results = list(search.results())
+                    serverNo = 4
+
+                if len(results) == 0:
+                    search = fanfox.SearchManga(searchStr,
+                                                threaded=False)  # search in Manganelo for correct name / options
+                    results = list(search.results())
+                    serverNo = 3
+
+                if len(results) == 0:
+                    search = kissmanga.SearchManga(searchStr,
+                                                   threaded=False)  # search in Manganelo for correct name / options
+                    results = list(search.results())
+                    serverNo = 2
 
                 if len(results) == 0:  # if 0 results return
                     await own.channel.send(" No results found with the name.")
@@ -177,12 +196,20 @@ async def on_message(own):
                 embed = discord.Embed(  # making an EMBED object for the Server List
                     title="Select Server",
                     color=0xFF5733)
-                embed.add_field(name="1  -  MangaNelo",  # add a field for MangaNelo
-                                value="Get access to large database of"
-                                      " manganelo with near instantaneous updates.",
-                                inline=False)
+                if serverNo == 1:
+                    embed.add_field(name="1  -  MangaNelo",  # add a field for MangaNelo
+                                    value="Get access to large database of"
+                                          " manganelo with near instantaneous updates.",
+                                    inline=False)
                 listofservers += '1'
-                thumbnail = manganelo.MangaInfo(info.url).results().icon
+                if serverNo == 1:
+                    thumbnail = manganelo.MangaInfo(info.url).results().icon
+                elif serverNo == 2:
+                    thumbnail = kissmanga.MangaInfo(info.url).results().icon
+                elif serverNo == 3:
+                    thumbnail = fanfox.MangaInfo(info.url).results().icon
+                elif serverNo == 4:
+                    thumbnail = MangaHub.MangaInfo(info.url).results().icon
                 embed.set_thumbnail(url=thumbnail)
                 if info2:
                     embed.add_field(name="2  -  KissManga", value="Read manga from 1stkissmanga.com.",
